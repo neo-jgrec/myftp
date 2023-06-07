@@ -130,22 +130,22 @@ int quit(client_t *client, char *arg);
  */
 int dele(client_t *client, char *arg);
 
-// /**
-//  * @brief Print working directory.
-//  *
-//  * @param client The client to print working directory.
-//  * @param arg <CRLF>
-//  *
-//  * @return int
-//  *
-//  * @retval 0 If success.
-//  * @retval 1 If error.
-//  *
-//  * @see RFC 959 - 4.1.1. PWD
-//  *
-//  * @example PWD
-//  */
-// int pwd(client_t *client, char *arg);
+/**
+ * @brief Print working directory.
+ *
+ * @param client The client to print working directory.
+ * @param arg <CRLF>
+ *
+ * @return int
+ *
+ * @retval 0 If success.
+ * @retval 1 If error.
+ *
+ * @see RFC 959 - 4.1.1. PWD
+ *
+ * @example PWD
+ */
+int pwd(client_t *client, char *arg);
 
 // /**
 //  * @brief Enter passive mode.
@@ -284,7 +284,7 @@ static const command_t commands[] = {
     {"CDUP", &cdup},
     {"QUIT", &quit},
     {"DELE", &dele},
-    // {"PWD", &pwd},
+    {"PWD", &pwd},
     // {"PASV", &pasv},
     // {"PORT", &port},
     // {"HELP", &help},

@@ -18,6 +18,7 @@ int new_client(client_t *client)
         return (EXIT_FAILURE);
     else if (pid == 0) {
         printf("Client connected : %d\n", client->fd);
+        client->cwd = strdup("/");
         process_client(client);
         exit(EXIT_SUCCESS);
     } else

@@ -17,13 +17,18 @@ static void sigint_handler(int signo)
     longjmp(jump_buffer, 1);
 }
 
-static int listenner_loop(int server_fd, struct client_head head, client_t *np)
+static int listenner_loop(int server_fd, struct client_head head,
+    client_t *np, char *path)
 {
     while (1) {
+        if (setjmp(jump_buffer) == 1)
+            break;
         np = calloc(1, sizeof(client_t));
         np->fd = tcp_accept(server_fd);
         if (!error_handling(np->fd, "Failed to accept client connection"))
             return (EXIT_FAILURE);
+        np->username = strdup("Anonymous");
+        np->cwd = strdup(path);
         TAILQ_INSERT_TAIL(&head, np, entries);
         new_client(np);
     }
@@ -47,9 +52,8 @@ int ftp(int port, char *path)
     printf("Server listening on port %d\n", port);
     DEBUG_PRINT("\033[0;32m[DEBUG]\033[0m Server path: %s\n", path);
     signal(SIGINT, sigint_handler);
-    ret = (setjmp(jump_buffer) == 0)
-        ? listenner_loop(server_fd, head, np)
-        : close_server(server_fd, &head);
+    ret = listenner_loop(server_fd, head, np, path);
+    close_server(server_fd, &head);
     printf("Server closed\n");
     return (ret);
 }
