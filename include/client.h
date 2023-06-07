@@ -190,22 +190,22 @@ int pasv(client_t *client, char *arg);
  */
 int port(client_t *client, char *arg);
 
-// /**
-//  * @brief Print help information.
-//  *
-//  * @param client The client to print help information.
-//  * @param arg <CRLF>
-//  *
-//  * @return int
-//  *
-//  * @retval 0 If success.
-//  * @retval 1 If error.
-//  *
-//  * @see RFC 959 - 4.1.1. HELP
-//  *
-//  * @example HELP
-//  */
-// int help(client_t *client, char *arg);
+/**
+ * @brief Print help information.
+ *
+ * @param client The client to print help information.
+ * @param arg <CRLF>
+ *
+ * @return int
+ *
+ * @retval 0 If success.
+ * @retval 1 If error.
+ *
+ * @see RFC 959 - 4.1.1. HELP
+ *
+ * @example HELP
+ */
+int help(client_t *client, char *arg);
 
 // /**
 //  * @brief Do nothing.
@@ -296,7 +296,7 @@ static const command_t commands[] = {
     {"PWD", &pwd},
     {"PASV", &pasv},
     {"PORT", &port},
-    // {"HELP", &help},
+    {"HELP", &help},
     // {"NOOP", &noop},
     // {"RETR", &retr},
     // {"STOR", &stor},
