@@ -21,7 +21,7 @@ typedef struct client_s {
     char *cwd;
 } client_t;
 
-TAILQ_HEAD(ClientHead, client_s);
+TAILQ_HEAD(client_head, client_s);
 
 typedef struct command_s {
     char *name;
@@ -113,22 +113,22 @@ int cdup(client_t *client, char *arg);
  */
 int quit(client_t *client, char *arg);
 
-// /**
-//  * @brief Delete file.
-//  *
-//  * @param client The client to delete file.
-//  * @param arg <SP> <pathname> <CRLF>
-//  *
-//  * @return int
-//  *
-//  * @retval 0 If success.
-//  * @retval 1 If error.
-//  *
-//  * @see RFC 959 - 4.1.1. DELE
-//  *
-//  * @example DELE /home/file
-//  */
-// int dele(client_t *client, char *arg);
+/**
+ * @brief Delete file.
+ *
+ * @param client The client to delete file.
+ * @param arg <SP> <pathname> <CRLF>
+ *
+ * @return int
+ *
+ * @retval 0 If success.
+ * @retval 1 If error.
+ *
+ * @see RFC 959 - 4.1.1. DELE
+ *
+ * @example DELE /home/file
+ */
+int dele(client_t *client, char *arg);
 
 // /**
 //  * @brief Print working directory.
@@ -283,7 +283,7 @@ static const command_t commands[] = {
     {"CWD", &cwd},
     {"CDUP", &cdup},
     {"QUIT", &quit},
-    // {"DELE", &dele},
+    {"DELE", &dele},
     // {"PWD", &pwd},
     // {"PASV", &pasv},
     // {"PORT", &port},
