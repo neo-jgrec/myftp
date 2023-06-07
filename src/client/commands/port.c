@@ -12,6 +12,7 @@ int port(client_t *client, char *arg)
     char *ip = NULL;
     int port = 0;
 
+    (void)ip;
     if (!error_handling(arg, "Missing argument"))
         return (EXIT_FAILURE);
     ip = strtok(arg, ",");
