@@ -99,4 +99,17 @@ int close_server(int server_fd, struct client_head *head);
  */
 char *get_ip(void);
 
+/**
+ * @brief Gets the path of the provided argument.
+ *
+ * This function gets the path of the provided argument.
+ * It concatenates the current working directory and the provided argument.
+ *
+ * @param cwd The current working directory.
+ * @param arg The argument.
+ *
+ * @return char * The path of the provided argument.
+ */
+char *get_path(char *cwd, char *arg);
+
 #endif /* !FTP_H_ */

@@ -224,20 +224,20 @@ int help(client_t *client, char *arg);
  */
 int noop(client_t *client, char *arg);
 
-// /**
-//  * @brief Retrieve file.
-//  *
-//  * @param client The client to retrieve file.
-//  * @param arg <SP> <pathname> <CRLF>
-//  *
-//  * @return int
-//  *
-//  * @retval 0 If success.
-//  * @retval 1 If error.
-//  *
-//  * @example RETR /home/file
-//  */
-// int retr(client_t *client, char *arg);
+/**
+ * @brief Retrieve file.
+ *
+ * @param client The client to retrieve file.
+ * @param arg <SP> <pathname> <CRLF>
+ *
+ * @return int
+ *
+ * @retval 0 If success.
+ * @retval 1 If error.
+ *
+ * @example RETR /home/file
+ */
+int retr(client_t *client, char *arg);
 
 // /**
 //  * @brief Store file.
@@ -254,20 +254,20 @@ int noop(client_t *client, char *arg);
 //  */
 // int stor(client_t *client, char *arg);
 
-// /**
-//  * @brief List files in the current working directory.
-//  *
-//  * @param client The client to list files.
-//  * @param arg <CRLF>
-//  *
-//  * @return int
-//  *
-//  * @retval 0 If success.
-//  * @retval 1 If error.
-//  *
-//  * @example LIST
-//  */
-// int list(client_t *client, char *arg);
+/**
+ * @brief List files in the current working directory.
+ *
+ * @param client The client to list files.
+ * @param arg <CRLF>
+ *
+ * @return int
+ *
+ * @retval 0 If success.
+ * @retval 1 If error.
+ *
+ * @example LIST
+ */
+int list(client_t *client, char *arg);
 
 /**
  * @brief System information.
@@ -300,7 +300,7 @@ static const command_t commands[] = {
     {"NOOP", &noop},
     // {"RETR", &retr},
     // {"STOR", &stor},
-    // {"LIST", &list},
+    {"LIST", &list},
     {"SYST", &syst},
     {NULL, NULL}
 };
