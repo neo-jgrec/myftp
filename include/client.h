@@ -173,22 +173,22 @@ int pwd(client_t *client, char *arg);
  */
 int pasv(client_t *client, char *arg);
 
-// /**
-//  * @brief Enter active mode.
-//  *
-//  * @param client The client to enter active mode.
-//  * @param arg <SP> <host-port> <CRLF>
-//  *
-//  * @return int
-//  *
-//  * @retval 0 If success.
-//  * @retval 1 If error.
-//  *
-//  * @see RFC 959 - 4.1.1. PORT
-//  *
-//  * @example PORT 127,0,0,1,0,21
-//  */
-// int port(client_t *client, char *arg);
+/**
+ * @brief Enter active mode.
+ *
+ * @param client The client to enter active mode.
+ * @param arg <SP> <host-port> <CRLF>
+ *
+ * @return int
+ *
+ * @retval 0 If success.
+ * @retval 1 If error.
+ *
+ * @see RFC 959 - 4.1.1. PORT
+ *
+ * @example PORT 127,0,0,1,0,21
+ */
+int port(client_t *client, char *arg);
 
 // /**
 //  * @brief Print help information.
@@ -295,7 +295,7 @@ static const command_t commands[] = {
     {"DELE", &dele},
     {"PWD", &pwd},
     {"PASV", &pasv},
-    // {"PORT", &port},
+    {"PORT", &port},
     // {"HELP", &help},
     // {"NOOP", &noop},
     // {"RETR", &retr},

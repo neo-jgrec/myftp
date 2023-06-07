@@ -88,4 +88,15 @@ int new_client(client_t *client);
  */
 int close_server(int server_fd, struct client_head *head);
 
+/**
+ * @brief Gets the server's IP address.
+ *
+ * This function gets the server's IP address.
+ * It creates a socket, connects it to a remote host, and gets the IP address
+ * of the socket.
+ *
+ * @return char * The server's IP address.
+ */
+char *get_ip(void);
+
 #endif /* !FTP_H_ */
