@@ -9,8 +9,7 @@
 
 int pass(client_t *client, char *arg)
 {
-    if (!arg)
-        return (dprintf(client->fd, "xxx Error (RFC compliant)\r\n"), 1);
+    arg = arg ? arg : "";
     if (client->password)
         free(client->password);
     client->password = strdup(arg);
