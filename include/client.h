@@ -12,6 +12,12 @@
     #include <sys/types.h>
     #include <unistd.h>
 
+typedef enum {
+    NO_TRANSFER,
+    ACTIVE_TRANSFER,
+    PASSIVE_TRANSFER
+} transfer_t;
+
 typedef struct client_s {
     int fd;
     pid_t pid;
@@ -19,6 +25,9 @@ typedef struct client_s {
     char *username;
     char *password;
     char *cwd;
+    transfer_t transfer;
+    unsigned int data_port;
+    int data_fd;
 } client_t;
 
 TAILQ_HEAD(client_head, client_s);
@@ -147,22 +156,22 @@ int dele(client_t *client, char *arg);
  */
 int pwd(client_t *client, char *arg);
 
-// /**
-//  * @brief Enter passive mode.
-//  *
-//  * @param client The client to enter passive mode.
-//  * @param arg <CRLF>
-//  *
-//  * @return int
-//  *
-//  * @retval 0 If success.
-//  * @retval 1 If error.
-//  *
-//  * @see RFC 959 - 4.1.1. PASV
-//  *
-//  * @example PASV
-//  */
-// int pasv(client_t *client, char *arg);
+/**
+ * @brief Enter passive mode.
+ *
+ * @param client The client to enter passive mode.
+ * @param arg <CRLF>
+ *
+ * @return int
+ *
+ * @retval 0 If success.
+ * @retval 1 If error.
+ *
+ * @see RFC 959 - 4.1.1. PASV
+ *
+ * @example PASV
+ */
+int pasv(client_t *client, char *arg);
 
 // /**
 //  * @brief Enter active mode.
@@ -285,7 +294,7 @@ static const command_t commands[] = {
     {"QUIT", &quit},
     {"DELE", &dele},
     {"PWD", &pwd},
-    // {"PASV", &pasv},
+    {"PASV", &pasv},
     // {"PORT", &port},
     // {"HELP", &help},
     // {"NOOP", &noop},
