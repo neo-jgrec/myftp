@@ -12,10 +12,14 @@
     #define EXIT_SUCCESS 0
 
     #define UNUSED __attribute__((unused))
+    #ifndef _GNU_SOURCE
+        #define _GNU_SOURCE
+    #endif
 
     #include <string.h>
     #include <stdio.h>
     #include <unistd.h>
+    #include <errno.h>
 
     #include "tcp_lib.h"
     #include "error_handling.h"
@@ -61,5 +65,18 @@ void process_client(client_t *client);
  * EXIT_FAILURE otherwise.
  */
 int new_client(client_t *client);
+
+/**
+ * @brief Closes the server.
+ *
+ * This function closes the server.
+ * It closes the server socket, and all the client sockets.
+ *
+ * @param server_fd The server socket.
+ * @param head The head of the client list.
+ *
+ * @return int EXIT_SUCCESS if the server was closed successfully,
+ */
+int close_server(int server_fd, struct client_head *head);
 
 #endif /* !FTP_H_ */
