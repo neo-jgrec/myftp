@@ -39,12 +39,13 @@ int ftp(int port, char *path)
     TAILQ_INIT(&head);
     if (!error_handling(path, "Invalid path")
         || !error_handling(port, "Invalid port")
-        || !error_handling(chdir(path), strerror(errno)))
+        || !error_handling(chdir(path), "Invalid path"))
         return (EXIT_FAILURE);
     int server_fd = tcp_listen(port, SOMAXCONN);
     if (!error_handling(server_fd, "Failed to create server socket"))
         return (EXIT_FAILURE);
     printf("Server listening on port %d\n", port);
+    DEBUG_PRINT("\033[0;32m[DEBUG]\033[0m Server path: %s\n", path);
     signal(SIGINT, sigint_handler);
     ret = (setjmp(jump_buffer) == 0)
         ? listenner_loop(server_fd, head, np)

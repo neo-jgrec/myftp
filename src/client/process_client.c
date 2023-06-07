@@ -13,18 +13,14 @@ static void execute_command(client_t *client, char *arg)
     char *param = strtok_r(NULL, "\r\n", &arg);
     size_t i = 0;
 
-    #if defined(DEBUG)
-        printf("\033[0;32m[DEBUG]\033[0m cmd: %s, param: %s\n", cmd, param);
-    #endif
+    DEBUG_PRINT("\033[0;32m[DEBUG]\033[0m cmd: %s, param: %s\n", cmd, param);
     for (i = 0; commands[i].name; i++)
         if (strcmp(commands[i].name, cmd) == 0) {
             commands[i].func(client, param);
             break;
         }
     if (!commands[i].name) {
-        #if defined(DEBUG)
-            printf("\033[0;31m[DEBUG]\033[0m Unknown command: %s\n", cmd);
-        #endif
+        DEBUG_PRINT("\033[0;31m[DEBUG]\033[0m Unknown command: %s\n", cmd);
         dprintf(client->fd, "xxx Error (RFC compliant)\r\n");
     }
 }
