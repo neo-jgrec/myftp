@@ -207,22 +207,22 @@ int port(client_t *client, char *arg);
  */
 int help(client_t *client, char *arg);
 
-// /**
-//  * @brief Do nothing.
-//  *
-//  * @param client The client to do nothing.
-//  * @param arg <CRLF>
-//  *
-//  * @return int
-//  *
-//  * @retval 0 If success.
-//  * @retval 1 If error.
-//  *
-//  * @see RFC 959 - 4.1.1. NOOP
-//  *
-//  * @example NOOP
-//  */
-// int noop(client_t *client, char *arg);
+/**
+ * @brief Do nothing.
+ *
+ * @param client The client to do nothing.
+ * @param arg <CRLF>
+ *
+ * @return int
+ *
+ * @retval 0 If success.
+ * @retval 1 If error.
+ *
+ * @see RFC 959 - 4.1.1. NOOP
+ *
+ * @example NOOP
+ */
+int noop(client_t *client, char *arg);
 
 // /**
 //  * @brief Retrieve file.
@@ -297,7 +297,7 @@ static const command_t commands[] = {
     {"PASV", &pasv},
     {"PORT", &port},
     {"HELP", &help},
-    // {"NOOP", &noop},
+    {"NOOP", &noop},
     // {"RETR", &retr},
     // {"STOR", &stor},
     // {"LIST", &list},
