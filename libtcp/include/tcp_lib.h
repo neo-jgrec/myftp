@@ -55,6 +55,7 @@ int tcp_connect(const char *server_ip, int server_port);
  * @param server_port The port number to bind the server socket to.
  * This must be an integer in the range 0-65535.
  * @param backlog The maximum length of the queue of pending connections.
+ * We can use the SOMAXCONN macro to set this to the maximum value allowed
  *
  * @return On successful setup,
  * this function returns the file descriptor of the server
