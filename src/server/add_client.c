@@ -21,6 +21,7 @@ int new_client(client_t *client)
         client->transfer = NO_TRANSFER;
         client->data_fd = -1;
         client->data_port = -1;
+        client->ip = get_ip();
         process_client(client);
         exit(EXIT_SUCCESS);
     } else

@@ -22,12 +22,15 @@ typedef struct client_s {
     int fd;
     pid_t pid;
     TAILQ_ENTRY(client_s) entries;
+    struct sockaddr_in addr;
     char *username;
     char *password;
     char *cwd;
     transfer_t transfer;
     unsigned int data_port;
     int data_fd;
+    char data_ip[16];
+    char *ip;
 } client_t;
 
 TAILQ_HEAD(client_head, client_s);

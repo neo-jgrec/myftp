@@ -112,4 +112,17 @@ char *get_ip(void);
  */
 char *get_path(char *cwd, char *arg);
 
+/**
+ * @brief Gets the port from the provided argument.
+ *
+ * This function gets the port from the provided argument.
+ * It splits the argument into 6 parts, and calculates the port from these
+ * parts.
+ *
+ * @param arg The argument.
+ *
+ * @return unsigned int The port.
+ */
+size_t get_port(char *arg);
+
 #endif /* !FTP_H_ */
