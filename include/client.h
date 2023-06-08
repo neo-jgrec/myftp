@@ -289,6 +289,21 @@ int list(client_t *client, char *arg);
  */
 int syst(client_t *client, char *arg);
 
+/**
+ * @brief Abort.
+ *
+ * @param client The client to abort.
+ * @param arg <CRLF>
+ *
+ * @return int
+ *
+ * @retval 0 If success.
+ * @retval 1 If error.
+ *
+ * @example ABOR
+ */
+int abor(client_t *client, char *arg);
+
 static const command_t commands[] = {
     {"USER", &user},
     {"PASS", &pass},
