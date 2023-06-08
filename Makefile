@@ -33,7 +33,9 @@ LCOV 					:= 	-fprofile-arcs -ftest-coverage
 TEST_NAME				=	unit_tests
 
 CFLAGS					=	-I include/ -I libtcp/include/
-WFLAGS					=	-Wall -Wextra -Wformat -Wpedantic
+WFLAGS					=	-Wall -Wextra -Wformat -Wpedantic -Walloca \
+							-Wduplicated-cond -Wshadow -Wduplicated-branches \
+							-Wundef -Wdouble-promotion -Wmissing-include-dirs
 
 LDLIBS					=	-L libtcp/ -l tcp_lib
 
