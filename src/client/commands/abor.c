@@ -7,7 +7,7 @@
 
 #include "ftp.h"
 
-int abor(client_t *client, char *arg)
+int abor(client_t *client, UNUSED char *arg)
 {
     char reply[] = "226 Closing data connection.\r\n";
     if (!error_handling((int)tcp_send(client->fd, reply,
