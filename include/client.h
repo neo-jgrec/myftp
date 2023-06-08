@@ -242,20 +242,20 @@ int noop(client_t *client, char *arg);
  */
 int retr(client_t *client, char *arg);
 
-// /**
-//  * @brief Store file.
-//  *
-//  * @param client The client to store file.
-//  * @param arg <SP> <pathname> <CRLF>
-//  *
-//  * @return int
-//  *
-//  * @retval 0 If success.
-//  * @retval 1 If error.
-//  *
-//  * @example STOR /home/file
-//  */
-// int stor(client_t *client, char *arg);
+/**
+ * @brief Store file.
+ *
+ * @param client The client to store file.
+ * @param arg <SP> <pathname> <CRLF>
+ *
+ * @return int
+ *
+ * @retval 0 If success.
+ * @retval 1 If error.
+ *
+ * @example STOR /home/file
+ */
+int stor(client_t *client, char *arg);
 
 /**
  * @brief List files in the current working directory.
@@ -301,8 +301,8 @@ static const command_t commands[] = {
     {"PORT", &port},
     {"HELP", &help},
     {"NOOP", &noop},
-    // {"RETR", &retr},
-    // {"STOR", &stor},
+    {"RETR", &retr},
+    {"STOR", &stor},
     {"LIST", &list},
     {"SYST", &syst},
     {NULL, NULL}
