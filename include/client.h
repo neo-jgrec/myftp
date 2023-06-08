@@ -320,6 +320,7 @@ static const command_t commands[] = {
     {"STOR", &stor},
     {"LIST", &list},
     {"SYST", &syst},
+    {"ABOR", &abor},
     {NULL, NULL}
 };
 
