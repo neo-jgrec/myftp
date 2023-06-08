@@ -18,13 +18,13 @@ int pasv(client_t *client, UNUSED char *arg)
         (struct sockaddr *)&sin, &len), strerror(errno)))
         return 1;
     unsigned short data_port = ntohs(sin.sin_port);
-    unsigned short p1 = data_port >> 8;
-    unsigned short p2 = data_port & 255;
+    unsigned short p1 = data_port >> 8, p2 = data_port & 255;
     client->transfer = PASSIVE_TRANSFER;
     client->data_port = data_port;
     client->data_fd = data_server_socket;
     char reply[4096];
-    snprintf(reply, 4096, "227 Entering Passive Mode (%s,%u,%u)\r\n", client->ip, p1, p2);
+    snprintf(reply, 4096, "227 Entering Passive Mode (%s,%u,%u)\r\n",
+        client->ip, p1, p2);
     if (!error_handling((int)tcp_send(client->fd, reply,
         strlen(reply)), "pasv : tcp_send"))
         return 1;
