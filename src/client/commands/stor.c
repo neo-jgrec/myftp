@@ -24,15 +24,10 @@ static void do_stor(client_t *client, FILE *file)
     exit(0);
 }
 
-int stor(client_t *client, char *arg)
+static int stor_fork(client_t *client, FILE *file)
 {
-    char *filename = arg;
-    FILE *file = fopen(filename, "wb");
-
-    if (!error_handling(file, "stor : fopen"))
-        return 1;
-    tcp_send(client->fd, reply_start, strlen(reply_start));
     pid_t pid = fork();
+
     if (pid == -1) {
         fclose(file);
         return 1;
@@ -41,5 +36,48 @@ int stor(client_t *client, char *arg)
         return 0;
     } else
         do_stor(client, file);
+    return 0;
+}
+
+static int stor_active(client_t *client, char *arg)
+{
+    char *filename = arg;
+    FILE *file = fopen(filename, "wb");
+
+    if (!error_handling(file, "stor : fopen"))
+        return 1;
+    tcp_send(client->fd, reply_start, strlen(reply_start));
+    if (stor_fork(client, file))
+        return 1;
+    return 0;
+}
+
+static int stor_passive(client_t *client, char *arg)
+{
+    struct sockaddr_in client_addr;
+    socklen_t addrlen = sizeof(client_addr);
+    char *filename = arg;
+    FILE *file = fopen(filename, "wb");
+
+    if (!error_handling(file, "stor : fopen"))
+        return 1;
+    tcp_send(client->fd, reply_start, strlen(reply_start));
+    client->data_fd = accept(client->data_fd,
+        (struct sockaddr *)&client_addr, &addrlen);
+    if (client->data_fd == -1) {
+        fclose(file);
+        return 1;
+    }
+    if (stor_fork(client, file))
+        return 1;
+    return 0;
+}
+
+int stor(client_t *client, char *arg)
+{
+    if (client->transfer == ACTIVE_TRANSFER)
+        return stor_active(client, arg);
+    else if (client->transfer == PASSIVE_TRANSFER)
+        return stor_passive(client, arg);
     return 0;
 }
