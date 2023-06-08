@@ -40,6 +40,8 @@ typedef struct command_s {
     int (*func)(client_t *client, char *arg);
 } command_t;
 
+// MANDATORY COMMANDS
+
 /**
  * @brief Specify user for authentication.
  *
@@ -271,6 +273,8 @@ int stor(client_t *client, char *arg);
  * @example LIST
  */
 int list(client_t *client, char *arg);
+
+// BONUS COMMANDS
 
 /**
  * @brief System information.
