@@ -11,6 +11,9 @@
     #include <sys/queue.h>
     #include <sys/types.h>
     #include <unistd.h>
+    #ifndef sockaddr_in
+        #include <netinet/in.h>
+    #endif
 
 typedef enum {
     NO_TRANSFER,

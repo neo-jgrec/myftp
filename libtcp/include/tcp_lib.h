@@ -187,7 +187,8 @@ void tcp_fd_set_add(int sockfd, fd_set *set);
  * @param maxfd The highest-numbered file descriptor in the set + 1.
  * @param set Pointer to the fd_set on which to perform the select operation.
  *
- * @return -1 in case of error, otherwise the number of descriptors contained in
+ * @return -1 in case of error,
+ *         otherwise the number of descriptors contained in
  *         the descriptor sets, which may be zero if the timeout expires before
  *         anything interesting happens.
  *

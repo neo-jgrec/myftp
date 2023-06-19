@@ -9,12 +9,15 @@
     #define ERROR_HANDLING_H_
 
     #include <stdbool.h>
+    #ifndef fprintf
+        #include <stdio.h>
+    #endif
 
     /**
      * @brief Handles errors.
      *
      * This macro is used to handle errors.
-     * The _Generic keyword is used to determine the type of the first argument,
+     * The _Generic keyword is used to determine the type of the first argument
      * and call the appropriate function.
      *
      * @param err The error to handle.
