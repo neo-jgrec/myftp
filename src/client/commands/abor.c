@@ -10,7 +10,8 @@
 int abor(client_t *client, UNUSED char *arg)
 {
     char reply[] = "226 Closing data connection.\r\n";
-    if (!error_handling((int)tcp_send(client->fd, reply,
+
+    if (!ERROR_HANDLING((int)tcp_send(client->fd, reply,
         strlen(reply)), "abor : tcp_send"))
         return 1;
     close(client->data_fd);

@@ -6,20 +6,22 @@
 */
 
 #include "ftp.h"
+#include <stdio.h>
 
 static void execute_command(client_t *client, char *arg)
 {
     char *cmd = strtok_r(arg, " \r\n", &arg);
     char *param = strtok_r(NULL, "\r\n", &arg);
     size_t i = 0;
+    int ret = 0;
 
     DEBUG_PRINT("\033[0;32m[DEBUG]\033[0m cmd: %s, param: %s\n", cmd, param);
     for (i = 0; commands[i].name; i++)
         if (strcmp(commands[i].name, cmd) == 0) {
-            commands[i].func(client, param);
+            ret = commands[i].func(client, param);
             break;
         }
-    if (!commands[i].name) {
+    if (!commands[i].name || ret == 1) {
         DEBUG_PRINT("\033[0;31m[DEBUG]\033[0m Unknown command: %s\n", cmd);
         dprintf(client->fd, "xxx Error (RFC compliant)\r\n");
     }
@@ -32,12 +34,11 @@ void process_client(client_t *client)
     ssize_t read = 0;
 
     dprintf(client->fd, "220 Service ready for new user.\r\n");
-
-    while ((read = getline(&line, &len, fdopen(client->fd, "r"))) != -1) {
+    read = getline(&line, &len, fdopen(client->fd, "r"));
+    for (; read != -1; read = getline(&line, &len, fdopen(client->fd, "r"))) {
         printf("Client %d sent: %s", client->fd, line);
         execute_command(client, line);
     }
-
     printf("Client disconnected : %d\n", client->fd);
     free(line);
     close(client->fd);

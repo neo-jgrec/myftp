@@ -18,7 +18,7 @@ static int exec_ls(char *arg, int client_data_fd)
 
     asprintf(&command, "/bin/ls -l %s", (arg) ? arg : "");
     pipe = popen(command, "r");
-    if (!error_handling(pipe, "popen listing"))
+    if (!ERROR_HANDLING(pipe, "popen listing"))
         return 1;
     while (!feof(pipe)) {
         if (fgets(buffer, sizeof(buffer), pipe) != NULL)
@@ -42,7 +42,6 @@ static int list_passive(client_t *client, char *arg)
         return 1;
     if (exec_ls(arg, client_data_fd))
         return 1;
-
     tcp_send(client->fd, reply_complete, strlen(reply_complete));
     close(client_data_fd);
     close(client->data_fd);

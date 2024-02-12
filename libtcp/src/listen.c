@@ -14,7 +14,6 @@ int tcp_listen(int server_port, int backlog)
 
     if (handle_error(server_socket, "socket error") == -1)
         return -1;
-
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(server_port);

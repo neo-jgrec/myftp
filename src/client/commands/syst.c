@@ -7,10 +7,8 @@
 
 #include "ftp.h"
 
-int syst(client_t *client, char *arg)
+int syst(client_t *client, UNUSED char *arg)
 {
-    (void)arg;
-
     #if defined(_WIN32)
         return (dprintf(client->fd, "215 Windows_NT Type: L8\r\n"), 0);
     #elif defined(__linux__)

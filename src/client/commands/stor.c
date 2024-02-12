@@ -14,9 +14,10 @@ static const char *reply_complete = "226 Transfer complete.\r\n";
 static void do_stor(client_t *client, FILE *file)
 {
     char buffer[1024];
-    ssize_t bytes;
+    ssize_t bytes = tcp_recv(client->data_fd, buffer, sizeof(buffer));
 
-    while ((bytes = tcp_recv(client->data_fd, buffer, sizeof(buffer))) > 0)
+    for (; bytes > 0;
+        bytes = tcp_recv(client->data_fd, buffer, sizeof(buffer)))
         fwrite(buffer, 1, bytes, file);
     fclose(file);
     tcp_send(client->fd, reply_complete, strlen(reply_complete));
@@ -44,7 +45,7 @@ static int stor_active(client_t *client, char *arg)
     char *filename = arg;
     FILE *file = fopen(filename, "wb");
 
-    if (!error_handling(file, "stor : fopen"))
+    if (!ERROR_HANDLING(file, "stor : fopen"))
         return 1;
     tcp_send(client->fd, reply_start, strlen(reply_start));
     if (stor_fork(client, file))
@@ -59,7 +60,7 @@ static int stor_passive(client_t *client, char *arg)
     char *filename = arg;
     FILE *file = fopen(filename, "wb");
 
-    if (!error_handling(file, "stor : fopen"))
+    if (!ERROR_HANDLING(file, "stor : fopen"))
         return 1;
     tcp_send(client->fd, reply_start, strlen(reply_start));
     client->data_fd = accept(client->data_fd,

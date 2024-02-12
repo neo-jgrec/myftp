@@ -6,32 +6,40 @@
 */
 
 #include "ftp.h"
+#include <stdio.h>
 
 static const char *reply_start =
 "150 Opening BINARY mode data connection for file transfer.\r\n";
 static const char *reply_complete = "226 Transfer complete.\r\n";
 
+static void retr_passive_destructor(FILE* file, int fd, client_t *client)
+{
+    fclose(file);
+    close(fd);
+    close(client->data_fd);
+    client->data_fd = -1;
+}
+
 static int retr_passive(client_t *client, char *arg)
 {
-    char *filename = arg;
-    FILE *file = fopen(filename, "rb");
+    FILE *file = fopen(arg, "rb");
     char buffer[1024];
     size_t bytes;
     struct sockaddr_in client_addr;
     socklen_t addrlen = sizeof(client_addr);
     int fd;
 
-    if (!error_handling(file, "retr : fopen")) return 1;
+    if (!ERROR_HANDLING(file, "retr : fopen"))
+        return 1;
     tcp_send(client->fd, reply_start, strlen(reply_start));
     fd = accept(client->data_fd, (struct sockaddr *)&client_addr, &addrlen);
-    if (fd == -1) return 1;
-    while ((bytes = fread(buffer, 1, sizeof(buffer), file)) > 0)
+    if (fd == -1)
+        return 1;
+    for (bytes = fread(buffer, 1, sizeof(buffer), file);
+        bytes > 0; bytes = fread(buffer, 1, sizeof(buffer), file))
         tcp_send(fd, buffer, bytes);
-    fclose(file);
     tcp_send(client->fd, reply_complete, strlen(reply_complete));
-    close(fd);
-    close(client->data_fd);
-    client->data_fd = -1;
+    retr_passive_destructor(file, fd, client);
     return 0;
 }
 
@@ -42,14 +50,12 @@ static int retr_port(client_t *client, char *arg)
     char buffer[1024];
     size_t bytes;
 
-    if (!error_handling(file, "retr : fopen"))
+    if (!ERROR_HANDLING(file, "retr : fopen"))
         return 1;
-
     tcp_send(client->fd, reply_start, strlen(reply_start));
-
-    while ((bytes = fread(buffer, 1, sizeof(buffer), file)) > 0)
+    for (bytes = fread(buffer, 1, sizeof(buffer), file);
+        bytes > 0; bytes = fread(buffer, 1, sizeof(buffer), file))
         tcp_send(client->data_fd, buffer, bytes);
-
     fclose(file);
     tcp_send(client->fd, reply_complete, strlen(reply_complete));
     close(client->data_fd);

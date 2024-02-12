@@ -13,8 +13,7 @@ int new_client(client_t *client)
     char buffer[256] = {0};
 
     sprintf(buffer, "Failed to fork process for client %d", client->fd);
-
-    if (!error_handling(pid, buffer))
+    if (!ERROR_HANDLING(pid, buffer))
         return (EXIT_FAILURE);
     else if (pid == 0) {
         printf("Client connected : %d\n", client->fd);

@@ -9,13 +9,14 @@
 
 int tcp_connect(const char *server_ip, int server_port)
 {
+    int client_socket = 0;
+    struct sockaddr_in server_addr;
+
     #if defined(DEBUG)
     printf("\033[0;32m[LIBTCP DEBUG]\033[0m [CONNECT] [IP: %s] [PORT: %d]\n",
         server_ip, server_port);
     #endif
-    int client_socket = socket(AF_INET, SOCK_STREAM, 0);
-    struct sockaddr_in server_addr;
-
+    client_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (handle_error(client_socket, "socket error") == -1)
         return -1;
     memset(&server_addr, 0, sizeof(server_addr));

@@ -20,11 +20,9 @@
         #ifndef fprintf
             #include <stdio.h>
         #endif
-        #define DEBUG_PRINT(fmt, ...) \
-            do { fprintf(stderr, fmt, __VA_ARGS__); } while (0)
+        #define DEBUG_PRINT(fmt, ...) fprintf(stderr, fmt, __VA_ARGS__)
     #else
-        #define DEBUG_PRINT(fmt, ...) \
-            do {} while (0)
+        #define DEBUG_PRINT(fmt, ...)
     #endif
 
     #include <string.h>

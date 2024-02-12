@@ -6,18 +6,19 @@
 */
 
 #include "ftp.h"
+#include <stdbool.h>
 
 static int set_data_socket(client_t *client)
 {
-    int data_socket;
     struct sockaddr_in data_addr;
     socklen_t addrlen = sizeof(struct sockaddr_in);
+    int data_socket = socket(AF_INET, SOCK_STREAM, 0);
 
     memset(&data_addr, 0, sizeof(data_addr));
     data_addr.sin_family = AF_INET;
     data_addr.sin_addr.s_addr = INADDR_ANY;
-    data_socket = socket(AF_INET, SOCK_STREAM, 0);
-    if (!error_handling(data_socket, "pasv : socket")) return 1;
+    if (ERROR_HANDLING(data_socket, "pasv : socket") == false)
+        return 1;
     if (bind(data_socket, (struct sockaddr*)&data_addr, sizeof(data_addr)) < 0
         || listen(data_socket, 1) == -1)
         return data_socket;
@@ -45,7 +46,6 @@ static int send_ip_and_port(client_t *client)
             (unsigned char)(data_addr.sin_addr.s_addr >> 24),
             (client->data_port >> 8) & 0xFF,
             client->data_port & 0xFF);
-
     tcp_send(client->fd, "227 Entering Passive Mode ", 25);
     tcp_send(client->fd, ip_and_port, strlen(ip_and_port));
     tcp_send(client->fd, "\r\n", 2);
@@ -54,9 +54,9 @@ static int send_ip_and_port(client_t *client)
 
 int pasv(client_t *client, UNUSED char *arg)
 {
-    int data_socket;
+    int data_socket = set_data_socket(client);
 
-    if ((data_socket = set_data_socket(client)) != 0) {
+    if (data_socket != 0) {
         close(data_socket);
         return 1;
     }

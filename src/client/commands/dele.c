@@ -12,10 +12,10 @@ int dele(client_t *client, char *arg)
     char *path = NULL;
     char *buffer = NULL;
 
-    if (!error_handling(arg, "Missing argument"))
+    if (!ERROR_HANDLING(arg, "Missing argument"))
         return (EXIT_FAILURE);
     path = get_path(client->cwd, arg);
-    if (!error_handling(path, "Invalid path"))
+    if (!ERROR_HANDLING(path, "Invalid path"))
         return (EXIT_FAILURE);
     if (remove(path) == -1) {
         buffer = strerror(errno);

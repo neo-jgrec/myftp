@@ -214,14 +214,17 @@ int tcp_select(int maxfd, fd_set *set);
  */
 void tcp_fd_set_clear(int sockfd, fd_set *set);
 
-    #define ERROR_LOG_MESSAGE "\033[1;31m[LIBTCP DEBUG] [ERROR]\
-[%s], [ERRNO: %d], [ERRMSG: %s]\033[0m\n"
+    #define M_CS "\033[1\5931m"
+    #define M_CE "\033[0m"
+    #define M_NAME M_CS "[LIBTCP DEBUG] [ERROR][%s]" M_CE
+    #define ERROR_LOG_MESSAGE M_NAME ", [ERRNO: %d], [ERRMSG: %s]\n"
 
-static inline int handle_error(int err, const char *errmsg) {
+static inline int handle_error(int err, const char *errmsg)
+{
     if (err == -1) {
-#if defined(DEBUG)
+    #if defined(DEBUG)
         printf(ERROR_LOG_MESSAGE, errmsg, errno, strerror(errno));
-#endif
+    #endif
         perror(errmsg);
         return -1;
     }
