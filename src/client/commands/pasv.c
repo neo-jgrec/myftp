@@ -38,17 +38,17 @@ static int send_ip_and_port(client_t *client)
     struct sockaddr_in data_addr;
     socklen_t addrlen = sizeof(struct sockaddr_in);
 
-    getsockname(client->fd, (struct sockaddr *)&data_addr, &addrlen);
+    getsockname(client->data_fd, (struct sockaddr *)&data_addr, &addrlen);
     snprintf(ip_and_port, 255, "(%d,%d,%d,%d,%d,%d)",
             (unsigned char)data_addr.sin_addr.s_addr,
             (unsigned char)(data_addr.sin_addr.s_addr >> 8),
             (unsigned char)(data_addr.sin_addr.s_addr >> 16),
             (unsigned char)(data_addr.sin_addr.s_addr >> 24),
-            (client->data_port >> 8) & 0xFF,
-            client->data_port & 0xFF);
-    tcp_send(client->fd, "227 Entering Passive Mode ", 25);
-    tcp_send(client->fd, ip_and_port, strlen(ip_and_port));
-    tcp_send(client->fd, "\r\n", 2);
+            client->data_port / 256, client->data_port % 256);
+    if (tcp_send(client->fd, "227 Entering Passive Mode ", 26) == -1
+        || tcp_send(client->fd, ip_and_port, strlen(ip_and_port)) == -1
+        || tcp_send(client->fd, ".\r\n", 3) == -1)
+        return 1;
     return 0;
 }
 
