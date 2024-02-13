@@ -162,7 +162,7 @@ ssize_t tcp_recv(int socket, void *buffer, size_t length);
  * fd_set my_set;
  * tcp_fd_set_init(my_socket, &my_set);
  */
-void tcp_fd_set_init(int sockfd, fd_set *set);
+void tcp_fd_set_init(fd_set *set, int sockfd);
 
 /**
  * @brief Add a socket descriptor to an existing file descriptor set.
