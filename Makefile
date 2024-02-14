@@ -24,7 +24,8 @@ DEBUG_OBJ				=	$(SRC:%.c=$(DEBUG_BUILD_DIR)/%.o) \
 $(MAIN_SRC:%.c=$(DEBUG_BUILD_DIR)/%.o)
 
 TEST_BUILD_DIR			=	$(BUILD_DIR)/tests
-TEST_SRC				:=	tests/basics.c
+TEST_SRC				:=	tests/basics.c \
+							tests/tcp_basics.c
 TEST_OBJ				=	$(SRC:%.c=$(TEST_BUILD_DIR)/%.o) \
 $(TEST_SRC:%.c=$(TEST_BUILD_DIR)/%.o)
 
