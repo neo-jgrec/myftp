@@ -34,6 +34,9 @@
     #include "error_handling.h"
     #include "client.h"
 
+    #define MAX_CLIENTS 1024
+    #define BUF_SIZE 1024
+
 /**
  * @brief Starts the FTP server.
  *
@@ -60,20 +63,19 @@ int ftp(int port, char *path);
  *
  * @param client The client to process.
  */
-void process_client(client_t *client);
+int process_client(int client_fd, struct client_head *head);
 
 /**
  * @brief Creates a new client.
  *
  * This function creates a new client.
- * It forks the current process, and calls process_client() in the child
  * process.
  *
  * @param client The client to create.
  * @return int EXIT_SUCCESS if the client was created successfully,
  * EXIT_FAILURE otherwise.
  */
-int new_client(client_t *client);
+int new_client(int fd, struct client_head *head);
 
 /**
  * @brief Closes the server.

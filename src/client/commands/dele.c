@@ -10,18 +10,23 @@
 int dele(client_t *client, char *arg)
 {
     char *path = NULL;
-    char *buffer = NULL;
+    char reply[] = "250 Requested file action okay, completed.\r\n";
 
-    if (!ERROR_HANDLING(arg, "Missing argument"))
-        return (EXIT_FAILURE);
-    path = get_path(client->cwd, arg);
-    if (!ERROR_HANDLING(path, "Invalid path"))
-        return (EXIT_FAILURE);
-    if (remove(path) == -1) {
-        buffer = strerror(errno);
-        dprintf(client->fd, "550 %s\r\n", buffer);
-        return (EXIT_FAILURE);
+    if (client->username == NULL) {
+        dprintf(client->fd, "530 Please login with USER and PASS.\r\n");
+        return 0;
     }
-    dprintf(client->fd, "250 Requested file action okay, completed.\r\n");
-    return (EXIT_SUCCESS);
+    if (arg == NULL) {
+        dprintf(client->fd, "550 Failed to delete file.\r\n");
+        return 0;
+    }
+    asprintf(&path, "rm -f %s", arg);
+    if (system(path) == -1) {
+        dprintf(client->fd, "550 Failed to delete file.\r\n");
+        free(path);
+        return 0;
+    }
+    dprintf(client->fd, "%s", reply);
+    free(path);
+    return 0;
 }

@@ -9,7 +9,7 @@
 #include <sys/signal.h>
 #include <setjmp.h>
 
-jmp_buf jump_buffer;
+static jmp_buf jump_buffer;
 
 static void sigint_handler(int signo)
 {
@@ -17,27 +17,57 @@ static void sigint_handler(int signo)
     longjmp(jump_buffer, 1);
 }
 
-static int listenner_loop(int server_fd, struct client_head *head,
-    client_t *np, char *path)
+static int handle_new_connection(int server_fd, fd_set *master_fds,
+    int *max_fd, struct client_head *head)
 {
-    while (1) {
-        if (setjmp(jump_buffer) == 1)
-            break;
-        np = calloc(1, sizeof(client_t));
-        np->fd = tcp_accept(server_fd);
-        if (!ERROR_HANDLING(np->fd, "Failed to accept client connection"))
-            return (EXIT_FAILURE);
-        np->username = strdup("Anonymous");
-        np->cwd = strdup(path);
-        TAILQ_INSERT_TAIL(head, np, entries);
-        new_client(np);
+    int new_fd = accept(server_fd, NULL, NULL);
+
+    if (new_fd == -1) {
+        perror("accept");
+    } else {
+        FD_SET(new_fd, master_fds);
+        *max_fd = new_fd > *max_fd ? new_fd : *max_fd;
+        new_client(new_fd, head);
     }
     return (EXIT_SUCCESS);
 }
 
+static int process_client_connection(int client_fd,
+    fd_set *master_fds, struct client_head *head)
+{
+    if (process_client(client_fd, head) == -1) {
+        close(client_fd);
+        FD_CLR(client_fd, master_fds);
+    }
+    return (EXIT_SUCCESS);
+}
+
+static int listener_loop(int server_fd, struct client_head *head)
+{
+    fd_set master_fds;
+    fd_set read_fds;
+    int max_fd = server_fd;
+    int var = 0;
+
+    (void)var;
+    tcp_fd_set_init(&master_fds, server_fd);
+    while (1) {
+        read_fds = master_fds;
+        if (!ERROR_HANDLING(tcp_select(max_fd, &read_fds), "select"))
+            return (EXIT_FAILURE);
+        for (int i = 0; i <= max_fd; i++) {
+            var = (FD_ISSET(i, &read_fds) && i == server_fd)
+                ? handle_new_connection(server_fd, &master_fds, &max_fd, head)
+                : 0;
+            var = (FD_ISSET(i, &read_fds) && i != server_fd)
+                ? process_client_connection(i, &master_fds, head)
+                : 0;
+        }
+    }
+}
+
 int ftp(int port, char *path)
 {
-    client_t *np = NULL;
     struct client_head head;
     int ret = EXIT_SUCCESS;
     int server_fd = 0;
@@ -53,7 +83,7 @@ int ftp(int port, char *path)
     printf("Server listening on port %d\n", port);
     DEBUG_PRINT("\033[0;32m[DEBUG]\033[0m Server path: %s\n", path);
     signal(SIGINT, sigint_handler);
-    ret = listenner_loop(server_fd, &head, np, path);
+    ret = setjmp(jump_buffer) == 0 ? listener_loop(server_fd, &head) : ret;
     close_server(server_fd, &head);
     printf("Server closed\n");
     return (ret);

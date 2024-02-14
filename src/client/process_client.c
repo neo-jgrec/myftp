@@ -6,7 +6,6 @@
 */
 
 #include "ftp.h"
-#include <stdio.h>
 
 static void execute_command(client_t *client, char *arg)
 {
@@ -21,26 +20,42 @@ static void execute_command(client_t *client, char *arg)
             ret = commands[i].func(client, param);
             break;
         }
-    if (!commands[i].name || ret == 1) {
+    if ((!commands[i].name || ret == 1) && client->fd != -1) {
         DEBUG_PRINT("\033[0;31m[DEBUG]\033[0m Unknown command: %s\n", cmd);
         dprintf(client->fd, "xxx Error (RFC compliant)\r\n");
     }
 }
 
-void process_client(client_t *client)
+static client_t *get_client_by_fd(struct client_head *head, int fd)
 {
-    char *line = NULL;
-    size_t len = 0;
-    ssize_t read = 0;
+    client_t *client = NULL;
 
-    dprintf(client->fd, "220 Service ready for new user.\r\n");
-    read = getline(&line, &len, fdopen(client->fd, "r"));
-    for (; read != -1; read = getline(&line, &len, fdopen(client->fd, "r"))) {
-        printf("Client %d sent: %s", client->fd, line);
-        execute_command(client, line);
+    TAILQ_FOREACH(client, head, entries) {
+        if (client->fd == fd)
+            return client;
     }
-    printf("Client disconnected : %d\n", client->fd);
-    free(line);
-    close(client->fd);
-    exit(EXIT_SUCCESS);
+    return NULL;
+}
+
+int process_client(int client_fd, struct client_head *head)
+{
+    char buf[BUF_SIZE];
+    int nbytes;
+    client_t *client;
+
+    nbytes = read(client_fd, buf, sizeof buf);
+    if (nbytes <= 0) {
+        if (nbytes == 0)
+            printf("selectserver: socket %d hung up\n", client_fd);
+        else
+            perror("recv");
+        close(client_fd);
+        return -1;
+    } else {
+        client = get_client_by_fd(head, client_fd);
+        buf[nbytes] = '\0';
+        DEBUG_PRINT("\033[0;32m[DEBUG]\033[0m Received: %s\n", buf);
+        execute_command(client, buf);
+    }
+    return 0;
 }

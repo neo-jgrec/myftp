@@ -7,23 +7,23 @@
 
 #include "ftp.h"
 
-int new_client(client_t *client)
+int new_client(int fd, struct client_head *head)
 {
-    pid_t pid = fork();
-    char buffer[256] = {0};
+    client_t *np = calloc(1, sizeof(client_t));
 
-    sprintf(buffer, "Failed to fork process for client %d", client->fd);
-    if (!ERROR_HANDLING(pid, buffer))
-        return (EXIT_FAILURE);
-    else if (pid == 0) {
-        printf("Client connected : %d\n", client->fd);
-        client->transfer = NO_TRANSFER;
-        client->data_fd = -1;
-        client->data_port = -1;
-        client->ip = get_ip();
-        process_client(client);
-        exit(EXIT_SUCCESS);
-    } else
-        client->pid = pid;
-    return (EXIT_SUCCESS);
+    if (!np) {
+        perror("Failed to allocate memory for new client");
+        close(fd);
+        return EXIT_FAILURE;
+    }
+    np->transfer = NO_TRANSFER;
+    np->data_fd = -1;
+    np->data_port = -1;
+    np->ip = get_ip();
+    np->username = NULL;
+    np->password = NULL;
+    np->fd = fd;
+    TAILQ_INSERT_TAIL(head, np, entries);
+    dprintf(fd, "220 Service ready for new user.\r\n");
+    return EXIT_SUCCESS;
 }
