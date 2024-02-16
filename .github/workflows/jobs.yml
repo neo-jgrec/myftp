@@ -1,0 +1,48 @@
+name: jobs
+
+on:
+  push:
+    branches-ignore:
+      - 'ga-ignore-*'
+  pull_request:
+    branches-ignore:
+      - 'ga-ignore-*'
+
+env:
+  EXECUTABLES: "myftp libtcp/libtcp_lib.a"
+
+jobs:
+  check_program_compilation:
+    continue-on-error: false
+    runs-on: ubuntu-latest
+    container: epitechcontent/epitest-docker:latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Compilation
+        timeout-minutes: 2
+        run: |
+          make
+      - name: Clean
+        if: always()
+        run: |
+          make clean
+      - name: Check if executable exists
+        if: always()
+        run: |
+          for executable in $(echo $EXECUTABLES | tr "," "\n"); do
+            if [ ! -f $executable ]; then
+              echo "::error file=Makefile::Missing executable $executable"
+            fi
+          done
+
+  run_tests:
+    needs: check_program_compilation
+    continue-on-error: false
+    runs-on: ubuntu-latest
+    container: epitechcontent/epitest-docker:latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Tests Run
+        timeout-minutes: 2
+        run: |
+          make tests_run
