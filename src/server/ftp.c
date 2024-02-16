@@ -42,28 +42,36 @@ static int process_client_connection(int client_fd,
     return (EXIT_SUCCESS);
 }
 
+static int process_connections(int server_fd, fd_set *master_fds,
+    int *max_fd, struct client_head *head)
+{
+    fd_set read_fds;
+
+    read_fds = *master_fds;
+    if (!ERROR_HANDLING(tcp_select(*max_fd, &read_fds), "select"))
+        return (EXIT_FAILURE);
+    for (int i = 0; i <= *max_fd; i++) {
+        if (!FD_ISSET(i, &read_fds))
+            continue;
+        if (i == server_fd)
+            handle_new_connection(server_fd, master_fds, max_fd, head);
+        else
+            process_client_connection(i, master_fds, head);
+    }
+    return 0;
+}
+
 static int listener_loop(int server_fd, struct client_head *head)
 {
     fd_set master_fds;
-    fd_set read_fds;
     int max_fd = server_fd;
-    int var = 0;
 
-    (void)var;
     tcp_fd_set_init(&master_fds, server_fd);
     while (1) {
-        read_fds = master_fds;
-        if (!ERROR_HANDLING(tcp_select(max_fd, &read_fds), "select"))
+        if (process_connections(server_fd, &master_fds, &max_fd, head) == -1)
             return (EXIT_FAILURE);
-        for (int i = 0; i <= max_fd; i++) {
-            var = (FD_ISSET(i, &read_fds) && i == server_fd)
-                ? handle_new_connection(server_fd, &master_fds, &max_fd, head)
-                : 0;
-            var = (FD_ISSET(i, &read_fds) && i != server_fd)
-                ? process_client_connection(i, &master_fds, head)
-                : 0;
-        }
     }
+    return (EXIT_SUCCESS);
 }
 
 int ftp(int port, char *path)
