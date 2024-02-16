@@ -11,7 +11,7 @@ int cdup(client_t *client, char *arg)
 {
     (void)arg;
     if (chdir("..") == -1)
-        return (dprintf(client->fd, "xxx Error (RFC compliant)\r\n"), 1);
+        return (dprintf(client->fd, "550 Failed to change directory.\r\n"), 1);
     if (client->cwd)
         free(client->cwd);
     client->cwd = getcwd(NULL, 0);

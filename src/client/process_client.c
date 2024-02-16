@@ -22,7 +22,7 @@ static void execute_command(client_t *client, char *arg)
         }
     if ((!commands[i].name || ret == 1) && client->fd != -1) {
         DEBUG_PRINT("\033[0;31m[DEBUG]\033[0m Unknown command: %s\n", cmd);
-        dprintf(client->fd, "xxx Error (RFC compliant)\r\n");
+        dprintf(client->fd, "500 Unknown command.\r\n");
     }
 }
 
@@ -46,7 +46,7 @@ int process_client(int client_fd, struct client_head *head)
     nbytes = read(client_fd, buf, sizeof buf);
     if (nbytes <= 0) {
         if (nbytes == 0)
-            printf("selectserver: socket %d hung up\n", client_fd);
+            printf("Connection closed by client %d\n", client_fd);
         else
             perror("recv");
         close(client_fd);
