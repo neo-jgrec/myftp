@@ -42,12 +42,12 @@ WFLAGS					=	-Wall -Wextra -Wformat -Wpedantic -Walloca \
 LDLIBS					=	-L libtcp/ -l tcp_lib
 
 _default:
-	@$(MAKE) -C libtcp/ --no-print-directory --silent
 	@$(MAKE) -j all --no-print-directory --silent
 
 all:	$(NAME)
 
 $(NAME):	$(OBJ)
+	@$(MAKE) -C libtcp/ --no-print-directory
 	@gcc -o $(NAME) $(OBJ) $(LDLIBS) \
 	&& echo -e "\033[1;32m[OK]\033[0m" $(NAME) \
 	|| echo -e "\033[1;31m[KO]\033[0m" $(NAME)
