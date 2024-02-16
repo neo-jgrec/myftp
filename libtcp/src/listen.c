@@ -10,9 +10,13 @@
 int tcp_listen(int server_port, int backlog)
 {
     int server_socket = socket(AF_INET, SOCK_STREAM, 0);
+    int optval = 1;
     struct sockaddr_in server_addr;
 
     if (handle_error(server_socket, "socket error") == -1)
+        return -1;
+    if (handle_error(setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR,
+        &optval, sizeof(optval)), "setsockopt error") == -1)
         return -1;
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;

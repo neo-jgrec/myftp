@@ -12,23 +12,22 @@ static int set_data_socket(client_t *client)
 {
     struct sockaddr_in data_addr;
     socklen_t addrlen = sizeof(struct sockaddr_in);
-    int data_socket = socket(AF_INET, SOCK_STREAM, 0);
+    int data_socket = tcp_listen(0, 1);
 
-    memset(&data_addr, 0, sizeof(data_addr));
-    data_addr.sin_family = AF_INET;
-    data_addr.sin_addr.s_addr = INADDR_ANY;
-    if (ERROR_HANDLING(data_socket, "pasv : socket") == false)
+    if (ERROR_HANDLING(data_socket, "pasv: tcp_listen failed") == -1)
         return 1;
-    if (bind(data_socket, (struct sockaddr*)&data_addr, sizeof(data_addr)) < 0
-        || listen(data_socket, 1) == -1)
-        return data_socket;
-    getsockname(data_socket, (struct sockaddr *)&data_addr, &addrlen);
+    if (ERROR_HANDLING(getsockname(data_socket, &data_addr, &addrlen),
+        "pasv: getsockname failed") == -1) {
+        close(data_socket);
+        return 1;
+    }
     client->data_fd = data_socket;
     client->data_port = ntohs(data_addr.sin_port);
-    getsockname(client->fd, (struct sockaddr *)&data_addr, &addrlen);
-    if (!inet_ntop(AF_INET, &data_addr.sin_addr, client->data_ip,
-        sizeof(client->data_ip)))
-        return data_socket;
+    if (!ERROR_HANDLING((char *)inet_ntop(AF_INET, &data_addr.sin_addr,
+        client->data_ip, sizeof(client->data_ip)), "pasv: inet_ntop failed")) {
+        close(data_socket);
+        return 1;
+    }
     return 0;
 }
 
