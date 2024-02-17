@@ -13,10 +13,7 @@ int pass(client_t *client, char *arg)
         dprintf(client->fd, "530 Please login with USER and PASS.\r\n");
         return 0;
     }
-    if (arg == NULL) {
-        dprintf(client->fd, "530 Permission denied.\r\n");
-        return 0;
-    }
+    arg = arg ? arg : "";
     client->password = strdup(arg);
     dprintf(client->fd, "230 User logged in, proceed.\r\n");
     return 0;
