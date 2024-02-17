@@ -89,6 +89,7 @@ $(DEBUG_BUILD_DIR)/%.o:	%.c $(HEADERS)
 
 tests_run:	CFLAGS += $(CRITERION)
 tests_run:	$(TEST_NAME)
+	@$(MAKE) -C libtcp/ --no-print-directory
 	@./$(TEST_NAME) --verbose --always-succeed
 	gcovr --exclude tests/
 
