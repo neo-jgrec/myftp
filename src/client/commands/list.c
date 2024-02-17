@@ -6,6 +6,8 @@
 */
 
 #include "ftp.h"
+#include <sys/types.h>
+#include <sys/wait.h>
 
 static const char *reply_start = "150 Here comes the directory listing.\r\n";
 static const char *reply_complete = "226 Directory send OK.\r\n";
@@ -29,6 +31,22 @@ static int exec_ls(char *arg, int client_data_fd)
     return 0;
 }
 
+static int fork_exec_ls(char *arg, int client_data_fd)
+{
+    pid_t pid = fork();
+
+    if (pid == -1) {
+        perror("fork");
+        return 1;
+    } else if (pid == 0) {
+        exec_ls(arg, client_data_fd);
+        exit(0);
+    } else {
+        waitpid(pid, NULL, 0);
+    }
+    return 0;
+}
+
 static int list_passive(client_t *client, char *arg)
 {
     struct sockaddr_in client_addr;
@@ -40,7 +58,7 @@ static int list_passive(client_t *client, char *arg)
         &addrlen);
     if (client_data_fd == -1)
         return 1;
-    if (exec_ls(arg, client_data_fd))
+    if (fork_exec_ls(arg, client_data_fd))
         return 1;
     tcp_send(client->fd, reply_complete, strlen(reply_complete));
     close(client_data_fd);
@@ -52,7 +70,7 @@ static int list_passive(client_t *client, char *arg)
 static int list_port(client_t *client, char *arg)
 {
     tcp_send(client->fd, reply_start, strlen(reply_start));
-    if (exec_ls(arg, client->data_fd))
+    if (fork_exec_ls(arg, client->data_fd))
         return 1;
     tcp_send(client->fd, reply_complete, strlen(reply_complete));
     close(client->data_fd);

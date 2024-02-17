@@ -25,22 +25,20 @@ static void handle_data_fd(client_t *client, FILE *file)
     close(client->data_fd);
 }
 
-static int stor_select(client_t *client, FILE *file)
+static void stor_fork(client_t *client, FILE *file)
 {
-    fd_set read_fds;
-    int max_fd;
-    int ready;
+    pid_t pid = fork();
 
-    tcp_fd_set_init(&read_fds, client->data_fd);
-    max_fd = client->data_fd + 1;
-    ready = tcp_select(max_fd, &read_fds);
-    if (!ERROR_HANDLING(ready, "stor : select")) {
+    if (pid == -1) {
+        perror("stor : fork");
         fclose(file);
-        return 1;
+        return;
     }
-    if (FD_ISSET(client->data_fd, &read_fds))
+    if (pid == 0) {
         handle_data_fd(client, file);
-    return 0;
+        exit(0);
+    }
+    fclose(file);
 }
 
 static int stor_active(client_t *client, char *arg)
@@ -51,8 +49,7 @@ static int stor_active(client_t *client, char *arg)
     if (!ERROR_HANDLING(file, "stor : fopen"))
         return 1;
     tcp_send(client->fd, reply_start, strlen(reply_start));
-    if (stor_select(client, file))
-        return 1;
+    stor_fork(client, file);
     return 0;
 }
 
@@ -72,8 +69,7 @@ static int stor_passive(client_t *client, char *arg)
         fclose(file);
         return 1;
     }
-    if (stor_select(client, file))
-        return 1;
+    stor_fork(client, file);
     return 0;
 }
 
