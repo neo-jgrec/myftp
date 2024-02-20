@@ -16,7 +16,7 @@ static void execute_command(client_t *client, char *arg)
 
     DEBUG_PRINT("\033[0;32m[DEBUG]\033[0m cmd: %s, param: %s\n", cmd, param);
     for (i = 0; commands[i].name; i++)
-        if (strcmp(commands[i].name, cmd) == 0) {
+        if (cmd && strcmp(commands[i].name, cmd) == 0) {
             ret = commands[i].func(client, param);
             break;
         }
