@@ -89,11 +89,11 @@ $(DEBUG_BUILD_DIR)/%.o:	%.c $(HEADERS)
 
 tests_run:	CFLAGS += $(CRITERION)
 tests_run:	$(TEST_NAME)
-	@$(MAKE) -C libtcp/ --no-print-directory
 	@./$(TEST_NAME) --verbose --always-succeed
 	gcovr --exclude tests/
 
 $(TEST_NAME):	$(TEST_OBJ)
+	@$(MAKE) -C libtcp/ --no-print-directory
 	@gcc -o $(TEST_NAME) $(TEST_OBJ) $(LDLIBS) $(CRITERION) \
 	&& echo -e "\033[1;32m[OK]\033[0m" $(TEST_NAME) \
 	|| echo -e "\033[1;31m[KO]\033[0m" $(TEST_NAME)
