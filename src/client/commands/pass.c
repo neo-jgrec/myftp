@@ -29,6 +29,7 @@ int pass(client_t *client, char *arg) {
     client->password = strdup(arg);
     if (check_password(client->username, client->password)) {
         dprintf(client->fd, "230 User logged in, proceed.\r\n");
+        client->logged_in = true;
     } else {
         dprintf(client->fd, "530 Login incorrect.\r\n");
     }

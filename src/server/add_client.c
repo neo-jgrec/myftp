@@ -23,6 +23,7 @@ int new_client(int fd, struct client_head *head)
     np->username = NULL;
     np->password = NULL;
     np->fd = fd;
+    np->logged_in = false;
     TAILQ_INSERT_TAIL(head, np, entries);
     dprintf(fd, "220 Service ready for new user.\r\n");
     return EXIT_SUCCESS;

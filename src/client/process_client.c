@@ -14,11 +14,17 @@ static void execute_command(client_t *client, char *arg)
     size_t i = 0;
 
     DEBUG_PRINT("\033[0;32m[DEBUG]\033[0m cmd: %s, param: %s\n", cmd, param);
-    for (i = 0; commands[i].name; i++)
-        if (cmd && strcmp(commands[i].name, cmd) == 0) {
+    for (i = 0; commands[i].name; i++) {
+        if (commands[i].need_login && !client->logged_in) {
+            DEBUG_PRINT("\033[0;31m[DEBUG]\033[0m Command requires login: %s\n", cmd);
+            dprintf(client->fd, "530 Not logged in.\r\n");
+            break;
+        }
+        if ((cmd && strcmp(commands[i].name, cmd) == 0)) {
             commands[i].func(client, param);
             break;
         }
+    }
     if ((!commands[i].name) && client->fd != -1) {
         DEBUG_PRINT("\033[0;31m[DEBUG]\033[0m Unknown command: %s\n", cmd);
         dprintf(client->fd, "500 Unknown command.\r\n");

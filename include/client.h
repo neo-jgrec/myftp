@@ -8,6 +8,7 @@
 #ifndef CLIENT_H_
     #define CLIENT_H_
 
+    #include <stdbool.h>
     #include <sys/queue.h>
     #include <sys/types.h>
     #include <unistd.h>
@@ -34,6 +35,7 @@ typedef struct client_s {
     int data_fd;
     char data_ip[16];
     char *ip;
+    bool logged_in;
 } client_t;
 
 TAILQ_HEAD(client_head, client_s);
@@ -41,6 +43,7 @@ TAILQ_HEAD(client_head, client_s);
 typedef struct command_s {
     char *name;
     int (*func)(client_t *client, char *arg);
+    bool need_login;
 } command_t;
 
 // MANDATORY COMMANDS
@@ -312,23 +315,23 @@ int syst(client_t *client, char *arg);
 int abor(client_t *client, char *arg);
 
 static const command_t commands[] = {
-    {"USER", &user},
-    {"PASS", &pass},
-    {"CWD", &cwd},
-    {"CDUP", &cdup},
-    {"QUIT", &quit},
-    {"DELE", &dele},
-    {"PWD", &pwd},
-    {"PASV", &pasv},
-    {"PORT", &port},
-    {"HELP", &help},
-    {"NOOP", &noop},
-    {"RETR", &retr},
-    {"STOR", &stor},
-    {"LIST", &list},
-    {"SYST", &syst},
-    {"ABOR", &abor},
-    {NULL, NULL}
+    {"USER", &user, false},
+    {"PASS", &pass, false},
+    {"CWD", &cwd, true},
+    {"CDUP", &cdup, true},
+    {"QUIT", &quit, false},
+    {"DELE", &dele, true},
+    {"PWD", &pwd, true},
+    {"PASV", &pasv, true},
+    {"PORT", &port, true},
+    {"HELP", &help, false},
+    {"NOOP", &noop, false},
+    {"RETR", &retr, true},
+    {"STOR", &stor, true},
+    {"LIST", &list, true},
+    {"SYST", &syst, false},
+    {"ABOR", &abor, false},
+    {NULL, NULL, false}
 };
 
 // Default registered users
