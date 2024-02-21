@@ -6,6 +6,7 @@
 */
 
 #include "ftp.h"
+#include <stdio.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 
@@ -20,8 +21,11 @@ static int exec_ls(char *arg, int client_data_fd)
 
     asprintf(&command, "/bin/ls -l %s", (arg) ? arg : "");
     pipe = popen(command, "r");
-    if (!ERROR_HANDLING(pipe, "popen listing"))
+    if (!ERROR_HANDLING(pipe, "popen listing")) {
+        dprintf(client_data_fd, "550 Failed to open file.\r\n");
+        free(command);
         return 1;
+    }
     while (!feof(pipe)) {
         if (fgets(buffer, sizeof(buffer), pipe) != NULL)
             tcp_send(client_data_fd, buffer, strlen(buffer));
@@ -35,8 +39,8 @@ static int fork_exec_ls(char *arg, int client_data_fd)
 {
     pid_t pid = fork();
 
-    if (pid == -1) {
-        perror("fork");
+    if (!ERROR_HANDLING(pid, "fork listing")) {
+        dprintf(client_data_fd, "550 Failed to open file.\r\n");
         return 1;
     } else if (pid == 0) {
         exec_ls(arg, client_data_fd);
@@ -56,10 +60,15 @@ static int list_passive(client_t *client, char *arg)
     tcp_send(client->fd, reply_start, strlen(reply_start));
     client_data_fd = accept(client->data_fd, (struct sockaddr *)&client_addr,
         &addrlen);
-    if (client_data_fd == -1)
+    if (!ERROR_HANDLING(client_data_fd, "accept listing")) {
+        dprintf(client->fd, "425 Can't open data connection.\r\n");
         return 1;
-    if (fork_exec_ls(arg, client_data_fd))
+    }
+    if (fork_exec_ls(arg, client_data_fd)) {
+        dprintf(client->fd, "550 Failed to open file.\r\n");
+        close(client_data_fd);
         return 1;
+    }
     tcp_send(client->fd, reply_complete, strlen(reply_complete));
     close(client_data_fd);
     close(client->data_fd);
@@ -70,8 +79,10 @@ static int list_passive(client_t *client, char *arg)
 static int list_port(client_t *client, char *arg)
 {
     tcp_send(client->fd, reply_start, strlen(reply_start));
-    if (fork_exec_ls(arg, client->data_fd))
+    if (fork_exec_ls(arg, client->data_fd)) {
+        dprintf(client->fd, "550 Failed to open file.\r\n");
         return 1;
+    }
     tcp_send(client->fd, reply_complete, strlen(reply_complete));
     close(client->data_fd);
     client->data_fd = -1;
@@ -85,6 +96,7 @@ int list(client_t *client, char *arg)
     } else if (client->transfer == ACTIVE_TRANSFER) {
         return list_port(client, arg);
     } else {
+        dprintf(client->fd, "425 Use PORT or PASV first.\r\n");
         return 1;
     }
 }

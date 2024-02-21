@@ -39,20 +39,26 @@ int port(client_t *client, char *arg)
     char ip[16];
     struct ip_data_struct ip_d = create_ip_data_struct();
 
-    if (!ERROR_HANDLING(arg, "port : arg"))
+    if (!ERROR_HANDLING(arg, "port : arg")) {
+        dprintf(client->fd, "501 Syntax error in parameters or arguments.\r\n");
         return 1;
+    }
     sscanf(arg, "%u,%u,%u,%u,%u,%u", &ip_d.h1, &ip_d.h2,
         &ip_d.h3, &ip_d.h4, &ip_d.p1, &ip_d.p2);
     ip_d.port = ip_d.p1 * 256 + ip_d.p2;
     snprintf(ip, 16, "%u.%u.%u.%u", ip_d.h1, ip_d.h2, ip_d.h3, ip_d.h4);
     data_socket = tcp_connect(ip, ip_d.port);
-    if (!ERROR_HANDLING(data_socket, "port : tcp_connect"))
+    if (!ERROR_HANDLING(data_socket, "port : tcp_connect")) {
+        dprintf(client->fd, "425 Can't open data connection.\r\n");
         return 1;
+    }
     client->transfer = ACTIVE_TRANSFER;
     client->data_port = ip_d.port;
     client->data_fd = data_socket;
     if (!ERROR_HANDLING((int)tcp_send(client->fd, reply,
-        strlen(reply)), "port : tcp_send"))
+        strlen(reply)), "port : tcp_send")) {
+        close(data_socket);
         return 1;
+    }
     return 0;
 }

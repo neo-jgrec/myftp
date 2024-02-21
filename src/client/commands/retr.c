@@ -44,15 +44,23 @@ static int retr_passive(client_t *client, char *arg)
     int fd;
     pid_t pid;
 
-    if (!ERROR_HANDLING(file, "retr : fopen"))
+    if (!ERROR_HANDLING(file, "retr : fopen")) {
+        dprintf(client->fd, "550 Failed to open file.\r\n");
         return 1;
+    }
     tcp_send(client->fd, reply_start, strlen(reply_start));
     fd = accept(client->data_fd, (struct sockaddr *)&client_addr, &addrlen);
-    if (fd == -1)
+    if (!ERROR_HANDLING(fd, "retr : accept")) {
+        dprintf(client->fd, "425 Can't open data connection.\r\n");
+        fclose(file);
         return 1;
+    }
     pid = fork();
-    if (pid == -1)
+    if (!ERROR_HANDLING(pid, "retr : fork")) {
+        fclose(file);
+        close(fd);
         return 1;
+    }
     if (pid == 0)
         retr_fork(file, fd, client);
     tcp_send(client->fd, reply_complete, strlen(reply_complete));
@@ -66,12 +74,17 @@ static int retr_port(client_t *client, char *arg)
     FILE *file = fopen(filename, "rb");
     pid_t pid;
 
-    if (!ERROR_HANDLING(file, "retr : fopen"))
+    if (!ERROR_HANDLING(file, "retr : fopen")) {
+        dprintf(client->fd, "550 Failed to open file.\r\n");
         return 1;
+    }
     tcp_send(client->fd, reply_start, strlen(reply_start));
     pid = fork();
-    if (pid == -1)
+    if (!ERROR_HANDLING(pid, "retr : fork")) {
+        dprintf(client->fd, "425 Can't open data connection.\r\n");
+        fclose(file);
         return 1;
+    }
     if (pid == 0)
         retr_fork(file, client->data_fd, client);
     fclose(file);
@@ -88,6 +101,7 @@ int retr(client_t *client, char *arg)
     } else if (client->transfer == ACTIVE_TRANSFER) {
         return retr_port(client, arg);
     } else {
+        dprintf(client->fd, "425 Use PORT or PASV first.\r\n");
         return 1;
     }
 }

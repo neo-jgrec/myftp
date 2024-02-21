@@ -46,8 +46,10 @@ static int stor_active(client_t *client, char *arg)
     char *filename = arg;
     FILE *file = fopen(filename, "wb");
 
-    if (!ERROR_HANDLING(file, "stor : fopen"))
+    if (!ERROR_HANDLING(file, "stor : fopen")) {
+        dprintf(client->fd, "550 Failed to open file.\r\n");
         return 1;
+    }
     tcp_send(client->fd, reply_start, strlen(reply_start));
     stor_fork(client, file);
     return 0;
@@ -60,13 +62,16 @@ static int stor_passive(client_t *client, char *arg)
     char *filename = arg;
     FILE *file = fopen(filename, "wb");
 
-    if (!ERROR_HANDLING(file, "stor : fopen"))
+    if (!ERROR_HANDLING(file, "stor : fopen")) {
+        dprintf(client->fd, "550 Failed to open file.\r\n");
         return 1;
+    }
     tcp_send(client->fd, reply_start, strlen(reply_start));
     client->data_fd = accept(client->data_fd,
         (struct sockaddr *)&client_addr, &addrlen);
     if (!ERROR_HANDLING(client->data_fd, "stor : accept")) {
         fclose(file);
+        dprintf(client->fd, "425 Can't open data connection.\r\n");
         return 1;
     }
     stor_fork(client, file);

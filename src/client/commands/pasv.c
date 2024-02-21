@@ -46,8 +46,10 @@ static int send_ip_and_port(client_t *client)
             client->data_port / 256, client->data_port % 256);
     if (tcp_send(client->fd, "227 Entering Passive Mode ", 26) == -1
         || tcp_send(client->fd, ip_and_port, strlen(ip_and_port)) == -1
-        || tcp_send(client->fd, ".\r\n", 3) == -1)
+        || tcp_send(client->fd, ".\r\n", 3) == -1) {
+        close(client->data_fd);
         return 1;
+    }
     return 0;
 }
 
@@ -56,11 +58,13 @@ int pasv(client_t *client, UNUSED char *arg)
     int data_socket = set_data_socket(client);
 
     if (data_socket != 0) {
-        close(data_socket);
+        dprintf(client->fd, "425 Can't open data connection.\r\n");
         return 1;
     }
-    if (send_ip_and_port(client))
+    if (send_ip_and_port(client)) {
+        dprintf(client->fd, "425 Can't open data connection.\r\n");
         return 1;
+    }
     client->transfer = PASSIVE_TRANSFER;
     return 0;
 }

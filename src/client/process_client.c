@@ -12,15 +12,14 @@ static void execute_command(client_t *client, char *arg)
     char *cmd = strtok_r(arg, " \r\n", &arg);
     char *param = strtok_r(NULL, "\r\n", &arg);
     size_t i = 0;
-    int ret = 0;
 
     DEBUG_PRINT("\033[0;32m[DEBUG]\033[0m cmd: %s, param: %s\n", cmd, param);
     for (i = 0; commands[i].name; i++)
         if (cmd && strcmp(commands[i].name, cmd) == 0) {
-            ret = commands[i].func(client, param);
+            commands[i].func(client, param);
             break;
         }
-    if ((!commands[i].name || ret == 1) && client->fd != -1) {
+    if ((!commands[i].name) && client->fd != -1) {
         DEBUG_PRINT("\033[0;31m[DEBUG]\033[0m Unknown command: %s\n", cmd);
         dprintf(client->fd, "500 Unknown command.\r\n");
     }
