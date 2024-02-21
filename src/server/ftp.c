@@ -69,7 +69,7 @@ static int listener_loop(int server_fd, struct client_head *head)
     tcp_fd_set_init(&master_fds, server_fd);
     while (1) {
         if (process_connections(server_fd, &master_fds, &max_fd, head) == -1)
-            return (EXIT_FAILURE);
+            return 84;
     }
     return (EXIT_SUCCESS);
 }
@@ -84,10 +84,10 @@ int ftp(int port, char *path)
     if (!ERROR_HANDLING(path, "Invalid path")
         || !ERROR_HANDLING(port, "Invalid port")
         || !ERROR_HANDLING(chdir(path), "Invalid path"))
-        return (EXIT_FAILURE);
+        return 84;
     server_fd = tcp_listen(port, SOMAXCONN);
     if (!ERROR_HANDLING(server_fd, "Failed to create server socket"))
-        return (EXIT_FAILURE);
+        return 84;
     printf("Server listening on port %d\n", port);
     DEBUG_PRINT("\033[0;32m[DEBUG]\033[0m Server path: %s\n", path);
     signal(SIGINT, sigint_handler);
