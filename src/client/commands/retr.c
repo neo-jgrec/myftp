@@ -26,6 +26,7 @@ static void retr_fork(FILE *file, int fd, client_t *client)
     char buffer[1024];
     size_t bytes;
 
+    tcp_send(client->fd, reply_complete, strlen(reply_complete));
     for (bytes = fread(buffer, 1, sizeof(buffer), file);
         bytes > 0; bytes = fread(buffer, 1, sizeof(buffer), file))
         tcp_send(fd, buffer, bytes);
@@ -44,18 +45,17 @@ static int retr_passive(client_t *client, char *arg)
     int fd;
     pid_t pid;
 
-    if (!ERROR_HANDLING(file, "retr : fopen"))
-        return 1;
+    if (!ERROR_HANDLING(file, "retr : fopen")) {
+        dprintf(client->fd, "550 Failed to open file.\r\n");
+        return 0;
+    }
     tcp_send(client->fd, reply_start, strlen(reply_start));
     fd = accept(client->data_fd, (struct sockaddr *)&client_addr, &addrlen);
     if (!ERROR_HANDLING(fd, "retr : accept"))
         return 1;
     pid = fork();
-    if (!ERROR_HANDLING(pid, "retr : fork"))
-        return 1;
     if (pid == 0)
         retr_fork(file, fd, client);
-    tcp_send(client->fd, reply_complete, strlen(reply_complete));
     retr_passive_destructor(file, fd, client);
     return 0;
 }
