@@ -61,7 +61,7 @@ int pasv(client_t *client, UNUSED char *arg)
         dprintf(client->fd, "425 Can't open data connection.\r\n");
         return 1;
     }
-    if (send_ip_and_port(client)) {
+    if (send_ip_and_port(client) != 0) {
         dprintf(client->fd, "425 Can't open data connection.\r\n");
         return 1;
     }

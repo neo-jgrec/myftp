@@ -17,7 +17,7 @@ int main(int ac, char **av)
     if (ac != 3 || (!strcmp(av[1], "--help") || !strcmp(av[1], "-h"))) {
         dprintf((ac != 3 ? 2 : 1), "%s", usage);
         return ((ac != 3) || (!strcmp(av[1], "--help") || !strcmp(av[1], "-h"))
-            ? EXIT_FAILURE : EXIT_SUCCESS);
+            ? 84 : EXIT_SUCCESS);
     }
     return (ftp(atoi(av[1]), av[2]));
 }
