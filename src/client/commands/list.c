@@ -58,8 +58,7 @@ static int list_passive(client_t *client, char *arg)
     int client_data_fd;
 
     tcp_send(client->fd, reply_start, strlen(reply_start));
-    client_data_fd = accept(client->data_fd, (struct sockaddr *)&client_addr,
-        &addrlen);
+    client_data_fd = accept(client->data_fd, &client_addr, &addrlen);
     if (!ERROR_HANDLING(client_data_fd, "accept listing")) {
         dprintf(client->fd, "425 Can't open data connection.\r\n");
         return 1;

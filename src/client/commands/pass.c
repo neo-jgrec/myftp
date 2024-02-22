@@ -10,7 +10,8 @@
 #include <stdbool.h>
 #include <string.h>
 
-static bool check_password(const char *username, const char *password) {
+static bool check_password(const char *username, const char *password)
+{
     for (int i = 0; default_users[i].username != NULL; i++) {
         if (strcmp(default_users[i].username, username) == 0 &&
             strcmp(default_users[i].password, password) == 0) {
@@ -20,7 +21,8 @@ static bool check_password(const char *username, const char *password) {
     return false;
 }
 
-int pass(client_t *client, char *arg) {
+int pass(client_t *client, char *arg)
+{
     if (client->username == NULL) {
         dprintf(client->fd, "530 Please login with USER and PASS.\r\n");
         return 0;

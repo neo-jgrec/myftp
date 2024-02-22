@@ -16,7 +16,7 @@ static void execute_command(client_t *client, char *arg)
     DEBUG_PRINT("\033[0;32m[DEBUG]\033[0m cmd: %s, param: %s\n", cmd, param);
     for (i = 0; commands[i].name; i++) {
         if (commands[i].need_login && !client->logged_in) {
-            DEBUG_PRINT("\033[0;31m[DEBUG]\033[0m Command requires login: %s\n", cmd);
+            DEBUG_PRINT("\033[0;31m[DEBUG]\033[0m need login: %s\n", cmd);
             dprintf(client->fd, "530 Not logged in.\r\n");
             break;
         }
