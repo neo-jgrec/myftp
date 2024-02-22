@@ -46,6 +46,11 @@ static int stor_active(client_t *client, char *arg)
     char *filename = arg;
     FILE *file = fopen(filename, "wb");
 
+    if (connect(client->data_fd, (struct sockaddr *)&client->data_addr,
+        sizeof(client->data_addr)) == -1) {
+        dprintf(client->fd, "425 Can't open data connection.\r\n");
+        return 1;
+    }
     if (!ERROR_HANDLING(file, "stor : fopen")) {
         dprintf(client->fd, "550 Failed to open file.\r\n");
         return 1;

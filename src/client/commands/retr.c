@@ -60,12 +60,26 @@ static int retr_passive(client_t *client, char *arg)
     return 0;
 }
 
+static int retr_port_destructor(FILE *file, client_t *client)
+{
+    fclose(file);
+    tcp_send(client->fd, reply_complete, strlen(reply_complete));
+    close(client->data_fd);
+    client->data_fd = -1;
+    return 0;
+}
+
 static int retr_port(client_t *client, char *arg)
 {
     char *filename = arg;
     FILE *file = fopen(filename, "rb");
     pid_t pid;
 
+    if (connect(client->data_fd,
+        &client->data_addr, sizeof(client->data_addr)) < 0) {
+        dprintf(client->fd, "425 Can't open data connection.\r\n");
+        return 1;
+    }
     if (!ERROR_HANDLING(file, "retr : fopen")) {
         dprintf(client->fd, "550 Failed to open file.\r\n");
         return 0;
@@ -76,11 +90,7 @@ static int retr_port(client_t *client, char *arg)
         return 1;
     if (pid == 0)
         retr_fork(file, client->data_fd, client);
-    fclose(file);
-    tcp_send(client->fd, reply_complete, strlen(reply_complete));
-    close(client->data_fd);
-    client->data_fd = -1;
-    return 0;
+    return retr_port_destructor(file, client);
 }
 
 int retr(client_t *client, char *arg)

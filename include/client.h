@@ -36,6 +36,7 @@ typedef struct client_s {
     char data_ip[16];
     char *ip;
     bool logged_in;
+    struct sockaddr_in data_addr;
 } client_t;
 
 TAILQ_HEAD(client_head, client_s);

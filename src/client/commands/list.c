@@ -77,6 +77,11 @@ static int list_passive(client_t *client, char *arg)
 
 static int list_port(client_t *client, char *arg)
 {
+    if (connect(client->data_fd, (struct sockaddr *)&client->data_addr,
+        sizeof(client->data_addr)) == -1) {
+        dprintf(client->fd, "425 Can't open data connection.\r\n");
+        return 1;
+    }
     tcp_send(client->fd, reply_start, strlen(reply_start));
     if (fork_exec_ls(arg, client->data_fd)) {
         dprintf(client->fd, "550 Failed to open file.\r\n");
