@@ -42,25 +42,42 @@ static client_t *get_client_by_fd(struct client_head *head, int fd)
     return NULL;
 }
 
+static char *read_till_crlf(int fd)
+{
+    static char buf[BUF_SIZE];
+    int nbytes = 0;
+    char c = '\0';
+
+    memset(buf, 0, BUF_SIZE);
+    for (int i = 0; i < BUF_SIZE - 1; i++) {
+        nbytes = read(fd, &c, 1);
+        if (nbytes <= 0)
+            return NULL;
+        if (c == '\n' && i > 0 && buf[i - 1] == '\r') {
+            buf[i - 1] = '\0';
+            return buf;
+        }
+        buf[i] = c;
+    }
+    return NULL;
+}
+
 int process_client(int client_fd, struct client_head *head)
 {
-    char buf[BUF_SIZE];
-    int nbytes;
-    client_t *client;
+    char *buf = NULL;
+    client_t *client = NULL;
 
-    nbytes = read(client_fd, buf, sizeof buf);
-    if (nbytes <= 0) {
-        if (nbytes == 0)
-            printf("Connection closed by client %d\n", client_fd);
-        else
-            perror("recv");
-        close(client_fd);
+    client = get_client_by_fd(head, client_fd);
+    if (!client) {
+        DEBUG_PRINT("\033[0;31m[DEBUG]\033[0m Client not found\n", "");
         return -1;
-    } else {
-        client = get_client_by_fd(head, client_fd);
-        buf[nbytes] = '\0';
-        DEBUG_PRINT("\033[0;32m[DEBUG]\033[0m Received: %s\n", buf);
-        execute_command(client, buf);
     }
+    buf = read_till_crlf(client_fd);
+    if (!buf) {
+        DEBUG_PRINT("\033[0;31m[DEBUG]\033[0m read_till_crlf failed\n", "");
+        return -1;
+    }
+    DEBUG_PRINT("\033[0;32m[DEBUG]\033[0m Received: %s\n", buf);
+    execute_command(client, buf);
     return 0;
 }
