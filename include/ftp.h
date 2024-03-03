@@ -37,6 +37,12 @@
     #define MAX_CLIENTS 1024
     #define BUF_SIZE 1024
 
+typedef struct {
+    int fd;
+    struct client_head *head;
+    const char *path;
+} server_data_t;
+
 /**
  * @brief Starts the FTP server.
  *
@@ -53,7 +59,7 @@
  * @note When a client is connected, a new process is created to handle it.
  * This process is terminated when the client disconnects.
  */
-int ftp(int port, char *path);
+int ftp(int port, char *path_raw);
 
 /**
  * @brief Processes a client.
@@ -63,7 +69,7 @@ int ftp(int port, char *path);
  *
  * @param client The client to process.
  */
-int process_client(int client_fd, struct client_head *head);
+int process_client(int client_fd, struct client_head *head, const char *path);
 
 /**
  * @brief Creates a new client.
@@ -75,7 +81,7 @@ int process_client(int client_fd, struct client_head *head);
  * @return int EXIT_SUCCESS if the client was created successfully,
  * EXIT_FAILURE otherwise.
  */
-int new_client(int fd, struct client_head *head);
+int new_client(int fd, struct client_head *head, const char *path);
 
 /**
  * @brief Closes the server.

@@ -7,16 +7,17 @@
 
 #include "ftp.h"
 
-static void execute_command(client_t *client, char *arg)
+static void execute_command(client_t *client, char *arg, const char *path)
 {
     char *cmd = strtok_r(arg, " \r\n", &arg);
     char *param = strtok_r(NULL, "\r\n", &arg);
     size_t i = 0;
 
-    DEBUG_PRINT("\033[0;32m[DEBUG]\033[0m cmd: %s, param: %s\n", cmd, param);
+    DEBUG_PRINT("\033[0;32m[DEBUG]\033[0m cmd: %s, param: %s, cwd: %s\n",
+        cmd, param, client->cwd);
+    chdir(client->cwd);
     for (i = 0; commands[i].name; i++) {
         if (commands[i].need_login && !client->logged_in) {
-            DEBUG_PRINT("\033[0;31m[DEBUG]\033[0m need login: %s\n", cmd);
             dprintf(client->fd, "530 Not logged in.\r\n");
             break;
         }
@@ -25,10 +26,9 @@ static void execute_command(client_t *client, char *arg)
             break;
         }
     }
-    if ((!commands[i].name) && client->fd != -1) {
-        DEBUG_PRINT("\033[0;31m[DEBUG]\033[0m Unknown command: %s\n", cmd);
+    if ((!commands[i].name) && client->fd != -1)
         dprintf(client->fd, "500 Unknown command.\r\n");
-    }
+    chdir(path);
 }
 
 static client_t *get_client_by_fd(struct client_head *head, int fd)
@@ -62,7 +62,7 @@ static char *read_till_crlf(int fd)
     return NULL;
 }
 
-int process_client(int client_fd, struct client_head *head)
+int process_client(int client_fd, struct client_head *head, const char *path)
 {
     char *buf = NULL;
     client_t *client = NULL;
@@ -78,6 +78,6 @@ int process_client(int client_fd, struct client_head *head)
         return -1;
     }
     DEBUG_PRINT("\033[0;32m[DEBUG]\033[0m Received: %s\n", buf);
-    execute_command(client, buf);
+    execute_command(client, buf, path);
     return 0;
 }

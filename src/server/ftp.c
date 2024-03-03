@@ -17,33 +17,33 @@ static void sigint_handler(int signo)
     longjmp(jump_buffer, 1);
 }
 
-static int handle_new_connection(int server_fd, fd_set *master_fds,
-    int *max_fd, struct client_head *head)
+static int handle_new_connection(server_data_t *data,
+    fd_set *master_fds, int *max_fd)
 {
-    int new_fd = accept(server_fd, NULL, NULL);
+    int new_fd = accept(data->fd, NULL, NULL);
 
     if (new_fd == -1) {
         perror("accept");
     } else {
         FD_SET(new_fd, master_fds);
         *max_fd = new_fd > *max_fd ? new_fd : *max_fd;
-        new_client(new_fd, head);
+        new_client(new_fd, data->head, data->path);
     }
     return (EXIT_SUCCESS);
 }
 
-static int process_client_connection(int client_fd,
-    fd_set *master_fds, struct client_head *head)
+static int process_client_connection(server_data_t *data, int client_fd,
+    fd_set *master_fds)
 {
-    if (process_client(client_fd, head) == -1) {
+    if (process_client(client_fd, data->head, data->path) == -1) {
         close(client_fd);
         FD_CLR(client_fd, master_fds);
     }
     return (EXIT_SUCCESS);
 }
 
-static int process_connections(int server_fd, fd_set *master_fds,
-    int *max_fd, struct client_head *head)
+static int process_connections(server_data_t *data,
+    fd_set *master_fds, int *max_fd)
 {
     fd_set read_fds;
 
@@ -53,35 +53,38 @@ static int process_connections(int server_fd, fd_set *master_fds,
     for (int i = 0; i <= *max_fd; i++) {
         if (!FD_ISSET(i, &read_fds))
             continue;
-        if (i == server_fd)
-            handle_new_connection(server_fd, master_fds, max_fd, head);
+        if (i == data->fd)
+            handle_new_connection(data, master_fds, max_fd);
         else
-            process_client_connection(i, master_fds, head);
+            process_client_connection(data, i, master_fds);
     }
     return 0;
 }
 
-static int listener_loop(int server_fd, struct client_head *head)
+static int listener_loop(int server_fd,
+    struct client_head *head, const char *path)
 {
     fd_set master_fds;
     int max_fd = server_fd;
 
     tcp_fd_set_init(&master_fds, server_fd);
     while (1) {
-        if (process_connections(server_fd, &master_fds, &max_fd, head) == -1)
+        if (process_connections(&(server_data_t){server_fd, head, path},
+            &master_fds, &max_fd) == -1)
             return 84;
     }
     return (EXIT_SUCCESS);
 }
 
-int ftp(int port, char *path)
+int ftp(int port, char *path_raw)
 {
     struct client_head head;
-    int ret = EXIT_SUCCESS;
+    int r = EXIT_SUCCESS;
     int server_fd = 0;
+    const char *path = realpath(path_raw, NULL);
 
     TAILQ_INIT(&head);
-    if (!ERROR_HANDLING(path, "Invalid path")
+    if (!ERROR_HANDLING(path_raw, "Invalid path")
         || !ERROR_HANDLING(port, "Invalid port")
         || !ERROR_HANDLING(chdir(path), "Invalid path"))
         return 84;
@@ -91,8 +94,8 @@ int ftp(int port, char *path)
     printf("Server listening on port %d\n", port);
     DEBUG_PRINT("\033[0;32m[DEBUG]\033[0m Server path: %s\n", path);
     signal(SIGINT, sigint_handler);
-    ret = setjmp(jump_buffer) == 0 ? listener_loop(server_fd, &head) : ret;
+    r = setjmp(jump_buffer) == 0 ? listener_loop(server_fd, &head, path) : r;
     close_server(server_fd, &head);
     printf("Server closed\n");
-    return (ret);
+    return (r);
 }
