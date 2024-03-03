@@ -12,12 +12,19 @@ static const char *usage =
 "\tport\tis the port number on which the server socket listens\n"
 "\tpath\tis the path to the home directory for the Anonymous user\n";
 
-int main(int ac, char **av)
+
+int main(int argc, char **argv)
 {
-    if (ac != 3 || (!strcmp(av[1], "--help") || !strcmp(av[1], "-h"))) {
-        dprintf((ac != 3 ? 2 : 1), "%s", usage);
-        return ((ac != 3) || (!strcmp(av[1], "--help") || !strcmp(av[1], "-h"))
-            ? 84 : EXIT_SUCCESS);
+    int port = 0;
+    char *address = NULL;
+    int isHelpRequested = argc > 1 && (!strcmp(argv[1], "--help")
+        || !strcmp(argv[1], "-h"));
+
+    if (argc != 3 || isHelpRequested) {
+        dprintf(isHelpRequested ? STDOUT_FILENO : STDERR_FILENO, "%s", usage);
+        return isHelpRequested ? 0 : 84;
     }
-    return (ftp(atoi(av[1]), av[2]));
+    port = atoi(argv[1]);
+    address = argv[2];
+    return ftp(port, address);
 }
