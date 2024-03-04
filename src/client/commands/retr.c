@@ -63,7 +63,6 @@ static int retr_passive(client_t *client, char *arg)
 static int retr_port_destructor(FILE *file, client_t *client)
 {
     fclose(file);
-    tcp_send(client->fd, reply_complete, strlen(reply_complete));
     close(client->data_fd);
     client->data_fd = -1;
     return 0;
